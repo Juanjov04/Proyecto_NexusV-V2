@@ -1,5 +1,5 @@
 # 1. IMAGEN BASE
-FROM php:8.2-fpm-alpine
+FROM php:8.1-fpm-alpine
 
 # 2. INSTALAR DEPENDENCIAS DEL SISTEMA (Añadimos libpq para PostgreSQL)
 RUN apk update && apk add \
@@ -39,3 +39,4 @@ EXPOSE 8000
 
 # 11. COMANDO DE ARRANQUE
 CMD sh -c "php-fpm & php artisan serve --host=0.0.0.0 --port=8000"
+
