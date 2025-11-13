@@ -1,0 +1,42 @@
+# 1. IMAGEN BASE: Usa una imagen de PHP con Alpine (ligera)
+FROM php:8.2-fpm-alpine
+
+# 2. INSTALAR DEPENDENCIAS DEL SISTEMA: Instala paquetes necesarios (git, npm, libpq para Postgres, etc.)
+RUN apk update && apk add \
+    git \
+    curl \
+    libxml2-dev \
+    postgresql-dev \
+    unzip \
+    nodejs \
+    npm
+
+# 3. INSTALAR EXTENSIONES DE PHP: Instala extensiones requeridas por Laravel/Postgres
+# pdo_pgsql: Para conectar con PostgreSQL
+# mbstring, exif, pcntl, bcmath, opcache: Extensiones estándar de Laravel
+RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath opcache
+
+# 4. DIRECTORIO DE TRABAJO: Define dónde estará la aplicación
+WORKDIR /app
+
+# 5. COPIAR CÓDIGO: Copia el código de tu repositorio al contenedor
+COPY . /app
+
+# 6. INSTALAR COMPOSER: Descarga e instala Composer (el gestor de dependencias de PHP)
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 7. INSTALAR DEPENDENCIAS DE PHP: Ejecuta Composer (instala la carpeta 'vendor')
+RUN composer install --no-dev --optimize-autoloader
+
+# 8. COMPILAR FRONTEND: Instala Node y compila los assets (CSS/JS)
+RUN npm install && npm run build
+
+# 9. PERMISOS DE LARAVEL: Otorga permisos de escritura a las carpetas de Laravel
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
+    chmod -R 775 /app/storage /app/bootstrap/cache
+
+# 10. EXPONER PUERTO
+EXPOSE 8000
+
+# 11. COMANDO DE ARRANQUE: Define cómo se inicia la aplicación (mantiene PHP-FPM y Artisan corriendo)
+CMD sh -c "php-fpm & php artisan serve --host=0.0.0.0 --port=8000"
