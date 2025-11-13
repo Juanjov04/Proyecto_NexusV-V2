@@ -13,7 +13,7 @@ RUN apk update && apk add \
     npm
 
 # 3. INSTALAR EXTENSIONES DE PHP (Ahora sí se puede instalar pdo_pgsql)
-RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath opcache
+# RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath opcache
 
 # 4. DIRECTORIO DE TRABAJO
 WORKDIR /app
@@ -39,4 +39,5 @@ EXPOSE 8000
 
 # 11. COMANDO DE ARRANQUE
 CMD sh -c "php-fpm & php artisan serve --host=0.0.0.0 --port=8000"
+
 
